@@ -47,9 +47,7 @@ namespace Aont
         }
 
 
-        public double J = -1.5e-21;
-        public double T = 200;
-        const double Kb = 1.4e-23;
+        public double J = 1;
         public void Advance(int n1, int m1, int n2, int m2)
         {
             int Spin_nm = SpinStates[n1, m1];
@@ -58,7 +56,6 @@ namespace Aont
                 return;
             else
             {
-                //実は間違っている！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
                 double P = GetEnergyFlip(n1, m1) + GetEnergyFlip(n2, m2);
                 if (P < 0)
                 {
@@ -67,7 +64,7 @@ namespace Aont
                 }
                 else
                 {
-                    P = Math.Exp(-P / (Kb * T));
+                    P = Math.Exp(-P);
                     if (P > random.NextDouble())
                     {
                         SetSpin(n1, m1, -Spin_nm);
@@ -80,11 +77,11 @@ namespace Aont
         {
             int Spin_nm = SpinStates[n, m];
             double P = 0;
-            P -= SpinStates[getPeriodic(n - 1, N), m];
-            P -= SpinStates[getPeriodic(n + 1, N), m];
-            P -= SpinStates[n, getPeriodic(m - 1, M)];
-            P -= SpinStates[n, getPeriodic(m + 1, M)];
-            return (J * P ) * -2 * Spin_nm;
+            P += SpinStates[getPeriodic(n - 1, N), m];
+            P += SpinStates[getPeriodic(n + 1, N), m];
+            P += SpinStates[n, getPeriodic(m - 1, M)];
+            P += SpinStates[n, getPeriodic(m + 1, M)];
+            return (J * P) * -2 * Spin_nm;
         }
         int getPeriodic(int x, int X)
         {
@@ -127,8 +124,8 @@ namespace Aont
             }
             else if (true)
             {
-                n2 = getPeriodic(n1 + random.Next(2*Step+1)  - Step, N);
-                m2 = getPeriodic(m1 + random.Next(2*Step+1)  - Step, M);
+                n2 = getPeriodic(n1 + random.Next(2 * Step + 1) - Step, N);
+                m2 = getPeriodic(m1 + random.Next(2 * Step + 1) - Step, M);
             }
             Advance(n1, m1, n2, m2);
         }
@@ -153,16 +150,29 @@ namespace Aont
         }
 
 
-        private SettingsForm settingform;
-        private void SettingToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (settingform == null || settingform.IsDisposed)
-            {
-                settingform = new SettingsForm(this);
-            }
-            settingform.Show();
 
+        private void toolStripTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            switch (e.KeyChar)
+            {
+                case '\r':
+                    e.Handled = true;
+                    try
+                    {
+                        this.J = double.Parse(this.toolStripTextBox1.Text);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                        this.toolStripTextBox1.Text = this.J.ToString();
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+
+
 
     }
 }
